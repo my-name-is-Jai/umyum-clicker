@@ -96,7 +96,8 @@
     <div id="stats">
       <div id="umyum" onclick="clickUmyum()">🍬</div>
       <p><strong>Umyums:</strong> <span id="count">0</span></p>
-      <p><strong>UPS:</strong> <span id="ups">0</span></p>
+      <p><strong>Umyums per Click:</strong> <span id="upc">1.0</span></p>
+      <p><strong>UPS:</strong> <span id="ups">0.0</span></p>
       <p><strong>Resurrections:</strong> <span id="resurrections">0</span></p>
       <button onclick="tryResurrect()">Bunny Resurrection</button>
     </div>
@@ -134,7 +135,8 @@
 
     function updateDisplay() {
       document.getElementById('count').textContent = formatNumber(umyums);
-      document.getElementById('ups').textContent = Math.round(ups * upsMultiplier);
+      document.getElementById('ups').textContent = (ups * upsMultiplier).toFixed(1);
+      document.getElementById('upc').textContent = (clickPower * upcMultiplier).toFixed(1);
       document.getElementById('resurrections').textContent = resurrectionCount;
     }
 
