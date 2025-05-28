@@ -7,38 +7,58 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
       margin: 0;
       background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Blue_gradient_background.png/1024px-Blue_gradient_background.png') no-repeat center center fixed;
       background-size: cover;
       overflow: hidden;
     }
-    h1 { font-size: 3em; color: #b03060; margin-top: 20px; }
+    h1 {
+      font-size: 3em;
+      color: #b03060;
+      text-align: center;
+      margin-top: 20px;
+    }
     #umyum {
       font-size: 5em;
       cursor: pointer;
       margin: 30px auto;
       width: 120px;
       height: 120px;
-      display: inline-block;
+      display: block;
       z-index: 5;
     }
-    .upgrade-section {
+    #main-content {
       display: flex;
       justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 20px;
+      align-items: flex-start;
+      padding: 20px;
+    }
+    #stats {
+      text-align: center;
+      flex-grow: 1;
+    }
+    #sidebar {
+      width: 350px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.85);
+      border-left: 3px solid #ffb6c1;
+      padding: 10px;
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
     }
     .upgrade, .ups {
-      background: rgba(255, 255, 255, 0.8);
+      background: #fff0f5;
       border: 2px solid #ffb6c1;
       border-radius: 12px;
       padding: 15px;
-      margin: 10px;
-      width: 280px;
+      margin: 10px 0;
+      width: 100%;
       box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     }
-    .upgrade h3, .ups h3 { margin-top: 0; color: #b03060; }
+    .upgrade h3, .ups h3 {
+      margin-top: 0;
+      color: #b03060;
+    }
     .upgrade button, .ups button {
       background: #ff69b4;
       border: none;
@@ -48,7 +68,9 @@
       cursor: pointer;
       font-weight: bold;
     }
-    .upgrade button:hover, .ups button:hover { background: #ff1493; }
+    .upgrade button:hover, .ups button:hover {
+      background: #ff1493;
+    }
     .lollipop {
       position: absolute;
       cursor: pointer;
@@ -58,8 +80,10 @@
     }
     #multiplierOverlay {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: rgba(255, 215, 0, 0.3);
       z-index: 9999;
       display: none;
@@ -85,7 +109,7 @@
       height: 40px;
       background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Emoji_u1f36c.svg/1024px-Emoji_u1f36c.svg.png') no-repeat center center / contain;
       animation: fall linear;
-      z-index: 1;
+      z-index: 0;
     }
     @keyframes fall {
       to {
@@ -98,17 +122,20 @@
   <h1>Umyum Clicker</h1>
   <div id="multiplierTimer">60s</div>
   <div id="multiplierOverlay"></div>
-  <div id="umyum" onclick="clickUmyum()">🍬</div>
-  <p><strong>Umyums:</strong> <span id="count">0</span></p>
-  <p><strong>Umyums Per Second (UPS):</strong> <span id="ups">0</span></p>
-  <div class="upgrade-section">
-    <div id="clickUpgrades">
-      <h2>Click Upgrades</h2>
+  <div id="main-content">
+    <div id="stats">
+      <div id="umyum" onclick="clickUmyum()">🍬</div>
+      <p><strong>Umyums:</strong> <span id="count">0</span></p>
+      <p><strong>Umyums Per Second (UPS):</strong> <span id="ups">0</span></p>
     </div>
-    <div id="autoUpgrades">
+    <div id="sidebar">
+      <h2>Click Upgrades</h2>
+      <div id="clickUpgrades"></div>
       <h2>Auto Umyums</h2>
+      <div id="autoUpgrades"></div>
     </div>
   </div>
+
   <script>
     let umyums = 0;
     let ups = 0;
