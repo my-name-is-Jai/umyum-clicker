@@ -96,8 +96,9 @@
     <div id="stats">
       <div id="umyum" onclick="clickUmyum()">🍬</div>
       <p><strong>Umyums:</strong> <span id="count">0</span></p>
-      <p><strong>Umyums per Click:</strong> <span id="upc">1.0</span></p>
-      <p><strong>UPS:</strong> <span id="ups">0.0</span></p>
+      <p><strong>Umyums per Click:</strong> <span id="upc">1.0 Umyums/click</span></p>
+      <p><strong>UPS:</strong> <span id="ups">0.0 Umyums/sec</span></p>
+      <p><strong>Total Umyums per Click:</strong> <span id="upcTracker">1.0 Umyums/click</span></p>
       <p><strong>Resurrections:</strong> <span id="resurrections">0</span></p>
       <button onclick="tryResurrect()">Bunny Resurrection</button>
     </div>
@@ -135,8 +136,9 @@
 
     function updateDisplay() {
       document.getElementById('count').textContent = formatNumber(umyums);
-      document.getElementById('ups').textContent = (ups * upsMultiplier).toFixed(1);
-      document.getElementById('upc').textContent = (clickPower * upcMultiplier).toFixed(1);
+      document.getElementById('ups').textContent = (ups * upsMultiplier).toFixed(1) + ' Umyums/sec';
+      document.getElementById('upc').textContent = (clickPower * upcMultiplier).toFixed(1) + ' Umyums/click';
+      document.getElementById('upcTracker').textContent = (clickPower * upcMultiplier).toFixed(1) + ' Umyums/click';
       document.getElementById('resurrections').textContent = resurrectionCount;
     }
 
@@ -213,7 +215,7 @@
     function tryResurrect() {
       const required = 1e21 * Math.pow(2, resurrectionCount);
       if (umyums >= required) {
-        const choice = prompt('Choose bonus: type \"ups\" for 2x UPS or \"click\" for 2x UPC');
+        const choice = prompt('Choose bonus: type "ups" for 2x UPS or "click" for 2x UPC');
         if (choice === 'ups') upsMultiplier *= 2;
         else if (choice === 'click') upcMultiplier *= 2;
         umyums = 0;
