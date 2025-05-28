@@ -167,14 +167,25 @@
     let upcMultiplier = 1;
     let upsMultiplier = 1;
 
+    function formatNumber(num) {
+      if (num < 1e6) return Math.round(num).toString();
+      const units = ['million', 'billion', 'trillion', 'quadrillion', 'quintillion', 'sextillion', 'septillion', 'octillion', 'nonillion', 'decillion'];
+      let unitIndex = -1;
+      while (num >= 1000 && unitIndex < units.length - 1) {
+        num /= 1000;
+        unitIndex++;
+      }
+      return num.toFixed(3) + ' ' + units[unitIndex];
+    }
+
     function clickUmyum() {
       umyums += clickPower * upcMultiplier;
       updateDisplay();
     }
 
     function updateDisplay() {
-      document.getElementById('count').textContent = Math.floor(umyums);
-      document.getElementById('ups').textContent = Math.floor(ups * upsMultiplier);
+      document.getElementById('count').textContent = formatNumber(umyums);
+      document.getElementById('ups').textContent = (ups * upsMultiplier).toFixed(2);
       document.getElementById('resurrections').textContent = resurrectionCount;
     }
 
@@ -184,7 +195,7 @@
       const title = document.createElement('h3');
       title.textContent = name;
       const costDisplay = document.createElement('p');
-      costDisplay.textContent = `Cost: ${baseCost} umyums`;
+      costDisplay.textContent = `Cost: ${formatNumber(baseCost)} umyums`;
       const button = document.createElement('button');
       button.textContent = 'Buy';
       let cost = baseCost;
@@ -197,7 +208,7 @@
             clickPower += 1;
           }
           cost *= 1.03;
-          costDisplay.textContent = `Cost: ${Math.floor(cost)} umyums`;
+          costDisplay.textContent = `Cost: ${formatNumber(cost)} umyums`;
           updateDisplay();
         }
       };
@@ -207,8 +218,17 @@
       document.getElementById(isAuto ? 'autoUpgrades' : 'clickUpgrades').appendChild(div);
     }
 
-    const clickUpgradeNames = ["Candy Tapper", "Sugar Smash", "Lick Boost", "Sweet Press", "Caramel Click", "Fudge Flick"];
-    const autoUpgradeNames = ["Candy Machine", "Auto Chewer", "Gumball Gear", "Sugar Synthesizer", "Umyum Extractor"];
+    const clickUpgradeNames = [
+      "Candy Tapper", "Sugar Smash", "Lick Boost", "Sweet Press", "Caramel Click", "Fudge Flick",
+      "Syrup Snap", "Marshmallow Mash", "Gummy Grab", "Taffy Touch", "Chocolate Chop",
+      "Lollipop Launch", "Cotton Crush", "Nougat Nudge", "Honey Hit", "Bonbon Bash"
+    ];
+
+    const autoUpgradeNames = [
+      "Candy Machine", "Auto Chewer", "Gumball Gear", "Sugar Synthesizer", "Umyum Extractor",
+      "Lollipop Leech", "Caramel Conveyor", "Sweet Sprayer", "Toffee Timer", "Candy Cloner"
+    ];
+
     clickUpgradeNames.forEach((name, i) => createUpgrade(name, 10 * Math.pow(1.5, i)));
     autoUpgradeNames.forEach((name, i) => createUpgrade(name, 500 * Math.pow(2, i), true));
 
