@@ -156,7 +156,7 @@
           umyums -= cost;
           if (isAuto) ups += production;
           else clickPower += production;
-          cost *= 1.05;
+          cost *= 1.3;
           count++;
           costDisplay.textContent = `Cost: ${formatNumber(cost)} umyums`;
           countDisplay.textContent = `Owned: ${count}`;
@@ -182,11 +182,12 @@
     }, 1000);
 
     function spawnLollipop() {
-      const lollipop = document.createElement('img');
-      lollipop.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Lollipop_icon.png/240px-Lollipop_icon.png';
+      const lollipop = document.createElement('div');
       lollipop.className = 'lollipop';
       lollipop.style.top = Math.random() * window.innerHeight + 'px';
       lollipop.style.left = Math.random() * window.innerWidth + 'px';
+      lollipop.style.fontSize = '48px';
+      lollipop.textContent = Math.random() > 0.5 ? '🐇' : '🐰';
       lollipop.onclick = () => {
         document.getElementById('multiplierOverlay').style.display = 'block';
         lollipop.remove();
