@@ -5,11 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Umyum Clicker</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; background: #fff8f0; position: relative; }
-    h1 { font-size: 2.5em; }
-    #umyum { font-size: 3em; cursor: pointer; }
-    .upgrade, .ups { margin: 10px auto; width: 80%; max-width: 600px; background: #eee; padding: 10px; border-radius: 8px; }
-    .bunny { position: absolute; cursor: pointer; width: 100px; height: 100px; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      margin: 0;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Blue_gradient_background.png/1024px-Blue_gradient_background.png') no-repeat center center fixed;
+      background-size: cover;
+      overflow: hidden;
+    }
+    h1 { font-size: 3em; color: #b03060; margin-top: 20px; }
+    #umyum {
+      font-size: 5em;
+      cursor: pointer;
+      margin: 30px auto;
+      width: 120px;
+      height: 120px;
+      display: inline-block;
+      z-index: 5;
+    }
+    .upgrade-section {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .upgrade, .ups {
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px solid #ffb6c1;
+      border-radius: 12px;
+      padding: 15px;
+      margin: 10px;
+      width: 280px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    }
+    .upgrade h3, .ups h3 { margin-top: 0; color: #b03060; }
+    .upgrade button, .ups button {
+      background: #ff69b4;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .upgrade button:hover, .ups button:hover { background: #ff1493; }
+    .lollipop {
+      position: absolute;
+      cursor: pointer;
+      width: 100px;
+      height: 100px;
+      z-index: 999;
+    }
     #multiplierOverlay {
       position: fixed;
       top: 0; left: 0;
@@ -22,28 +68,47 @@
     #multiplierTimer {
       position: fixed;
       top: 10px;
-      right: 10px;
-      background: gold;
-      color: black;
-      padding: 10px 15px;
+      left: 10px;
+      background: black;
+      color: #00ffcc;
+      font-size: 2em;
+      font-family: monospace;
+      padding: 10px;
       border-radius: 10px;
-      font-weight: bold;
       display: none;
       z-index: 10000;
+    }
+    .candy {
+      position: fixed;
+      top: -50px;
+      width: 40px;
+      height: 40px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Emoji_u1f36c.svg/1024px-Emoji_u1f36c.svg.png') no-repeat center center / contain;
+      animation: fall linear;
+      z-index: 1;
+    }
+    @keyframes fall {
+      to {
+        transform: translateY(110vh);
+      }
     }
   </style>
 </head>
 <body>
   <h1>Umyum Clicker</h1>
-  <div id="umyum" onclick="clickUmyum()">🍬 Click Me!</div>
+  <div id="multiplierTimer">60s</div>
+  <div id="multiplierOverlay"></div>
+  <div id="umyum" onclick="clickUmyum()">🍬</div>
   <p><strong>Umyums:</strong> <span id="count">0</span></p>
   <p><strong>Umyums Per Second (UPS):</strong> <span id="ups">0</span></p>
-  <div id="upgrades"><h2>Click Upgrades</h2></div>
-  <div id="autoUpgrades"><h2>Auto Umyums</h2></div>
-  <div id="bunny"></div>
-  <div id="multiplierOverlay"></div>
-  <div id="multiplierTimer">60s</div>
-
+  <div class="upgrade-section">
+    <div id="clickUpgrades">
+      <h2>Click Upgrades</h2>
+    </div>
+    <div id="autoUpgrades">
+      <h2>Auto Umyums</h2>
+    </div>
+  </div>
   <script>
     let umyums = 0;
     let ups = 0;
@@ -65,11 +130,12 @@
     function createUpgrade(name, baseCost, isAuto = false) {
       const div = document.createElement('div');
       div.className = isAuto ? 'ups' : 'upgrade';
-      const label = document.createElement('span');
-      label.textContent = `${name} - ${baseCost} umyums`;
+      const title = document.createElement('h3');
+      title.textContent = name;
+      const costDisplay = document.createElement('p');
+      costDisplay.textContent = `Cost: ${baseCost} umyums`;
       const button = document.createElement('button');
       button.textContent = 'Buy';
-
       let cost = baseCost;
       button.onclick = function () {
         if (umyums >= cost) {
@@ -80,56 +146,39 @@
             clickPower += 1;
           }
           cost *= 1.03;
-          label.textContent = `${name} - ${Math.floor(cost)} umyums`;
+          costDisplay.textContent = `Cost: ${Math.floor(cost)} umyums`;
           updateDisplay();
         }
       };
-
-      div.appendChild(label);
+      div.appendChild(title);
+      div.appendChild(costDisplay);
       div.appendChild(button);
-      (isAuto ? document.getElementById('autoUpgrades') : document.getElementById('upgrades')).appendChild(div);
+      document.getElementById(isAuto ? 'autoUpgrades' : 'clickUpgrades').appendChild(div);
     }
 
-    const upgradeNames = Array.from({ length: 75 }, (_, i) => `Upgrade #${i + 1}`);
-    const wordPrices = [
-      "10", "101", "1 thousand, 30", "10 thousand, 455", "106 thousand, 118",
-      "1 million, 77 thousand, 55", "10 million, 931 thousand, 644", "110 million, 951 thousand, 477",
-      "1 billion, 126 million, 109 thousand, 639", "11 billion, 429 million, 527 thousand, 73",
-      "116 billion, 481 million, 224 thousand, 170", "1 trillion, 187 billion, 41 million, 25 thousand, 363",
-      "12 trillion, 98 billion, 478 million, 304 thousand, 835", "128 trillion, 100 billion, 725 million, 203 thousand, 412",
-      "1 quadrillion, 311 trillion, 892 billion, 332 million, 262 thousand, 801", "13 quadrillion, 447 trillion, 143 billion, 122 million, 529 thousand, 521",
-      "137 quadrillion, 894 trillion, 184 billion, 371 million, 777 thousand, 723", "1 quintillion, 414 quadrillion, 445 trillion, 861 billion, 283 million, 141 thousand, 684",
-      "14 quintillion, 506 quadrillion, 841 trillion, 571 billion, 442 million, 576 thousand, 693",
-      "149 quintillion, 842 quadrillion, 273 trillion, 160 billion, 581 million, 499 thousand, 870",
-      "1 sextillion, 547 quintillion, 704 quadrillion, 264 trillion, 964 billion, 206 million, 110 thousand, 376",
-      "15 sextillion, 576 quintillion, 299 quadrillion, 605 trillion, 430 billion, 209 million, 120 thousand, 776",
-      "160 sextillion, 861 quintillion, 199 quadrillion, 940 trillion, 236 billion, 442 million, 346 thousand, 486",
-      "1 septillion, 661 sextillion, 324 quintillion, 507 quadrillion, 976 trillion, 152 billion, 331 million, 650 thousand, 577",
-      "16 septillion, 699 sextillion, 270 quintillion, 135 quadrillion, 208 trillion, 974 billion, 724 million, 408 thousand, 925",
-      "170 septillion, 957 sextillion, 264 quintillion, 786 quadrillion, 248 trillion, 974 billion, 471 million, 939 thousand, 234",
-      "1 octillion, 750 septillion, 883 sextillion, 499 quintillion, 540 quadrillion, 960 trillion, 998 billion, 402 million, 431 thousand, 710",
-      "17 octillion, 831 septillion, 301 sextillion, 466 quintillion, 407 quadrillion, 334 trillion, 335 billion, 953 million, 152 thousand, 860",
-      "181 octillion, 786 septillion, 340 sextillion, 794 quintillion, 826 quadrillion, 334 trillion, 875 billion, 267 million, 929 thousand, 324",
-      "1 nonillion, 849 octillion, 800 septillion, 984 sextillion, 624 quintillion, 117 quadrillion, 911 trillion, 690 billion, 417 million, 493 thousand, 276",
-      "3 quattuorvigintillion"
+    const clickUpgradeNames = [
+      "Candy Tapper", "Sugar Smash", "Lick Boost", "Sweet Press", "Caramel Click",
+      "Fudge Flick", "Marshmallow Mash", "Jellybean Jam", "Toffee Touch", "Pop Rock Punch"
     ];
-
-    upgradeNames.forEach((name, i) => {
-      createUpgrade(name, i < wordPrices.length ? parseInt(wordPrices[i].replace(/[^\d]/g, "")) : 10 ** (i + 1), i >= 37);
-    });
+    const autoUpgradeNames = [
+      "Candy Machine", "Auto Chewer", "Gumball Gear", "Sugar Synthesizer", "Umyum Extractor",
+      "Mega Mixer", "Sweet Replicator", "Umyum Reactor", "Candy Farm", "Lollipop Line"
+    ];
+    clickUpgradeNames.forEach((name, i) => createUpgrade(name, 10 * Math.pow(1.5, i)));
+    autoUpgradeNames.forEach((name, i) => createUpgrade(name, 500 * Math.pow(2, i), true));
 
     setInterval(() => {
       umyums += ups * multiplier;
       updateDisplay();
     }, 1000);
 
-    function spawnBunny() {
-      const bunny = document.createElement('img');
-      bunny.src = 'https://upload.wikimedia.org/wikipedia/commons/7/70/Rabbit_in_montana.jpg';
-      bunny.className = 'bunny';
-      bunny.style.top = Math.random() * window.innerHeight + 'px';
-      bunny.style.left = Math.random() * window.innerWidth + 'px';
-      bunny.onclick = () => {
+    function spawnLollipop() {
+      const lollipop = document.createElement('img');
+      lollipop.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Lollipop_icon.png/240px-Lollipop_icon.png';
+      lollipop.className = 'lollipop';
+      lollipop.style.top = Math.random() * window.innerHeight + 'px';
+      lollipop.style.left = Math.random() * window.innerWidth + 'px';
+      lollipop.onclick = () => {
         const multi = Math.floor(Math.random() * 9 + 2);
         multiplier = multi;
         document.getElementById('multiplierOverlay').style.display = 'block';
@@ -149,11 +198,27 @@
           }
         }, 1000);
 
-        bunny.remove();
+        lollipop.remove();
       };
-      document.body.appendChild(bunny);
+      document.body.appendChild(lollipop);
     }
-    setInterval(spawnBunny, (Math.random() * 2 + 3) * 60 * 1000);
+
+    function dropCandy() {
+      const candy = document.createElement('div');
+      candy.className = 'candy';
+      candy.style.left = Math.random() * window.innerWidth + 'px';
+      candy.style.animationDuration = (3 + Math.random() * 2) + 's';
+      document.body.appendChild(candy);
+      setTimeout(() => candy.remove(), 6000);
+    }
+
+    setInterval(dropCandy, 500);
+
+    setInterval(() => {
+      if (!document.querySelector('.lollipop')) {
+        spawnLollipop();
+      }
+    }, (Math.random() * 2 + 3) * 60 * 1000);
   </script>
 </body>
 </html>
