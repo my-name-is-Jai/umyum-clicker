@@ -1,83 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Umyum Clicker</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: sans-serif;
+      background: #ffeff7;
       margin: 0;
-      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Blue_gradient_background.png/1024px-Blue_gradient_background.png') no-repeat center center fixed;
-      background-size: cover;
       overflow: hidden;
     }
     h1 {
-      font-size: 3em;
-      color: #b03060;
       text-align: center;
-      margin-top: 20px;
+      color: #e91e63;
+    }
+    #main-content {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
     }
     #umyum {
       font-size: 5em;
       cursor: pointer;
-      margin: 30px auto;
-      width: 120px;
-      height: 120px;
       display: block;
-      z-index: 5;
-    }
-    #main-content {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 20px;
+      margin: 0 auto;
     }
     #stats {
       text-align: center;
       flex-grow: 1;
     }
     #sidebar {
-      width: 350px;
-      max-height: 90vh;
-      overflow-y: auto;
-      background: rgba(255, 255, 255, 0.85);
-      border-left: 3px solid #ffb6c1;
+      width: 300px;
+      background: #fff0f5;
+      border-left: 2px solid #e91e63;
       padding: 10px;
-      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
     }
     .upgrade, .ups {
-      background: #fff0f5;
-      border: 2px solid #ffb6c1;
-      border-radius: 12px;
-      padding: 15px;
+      border: 1px solid #e91e63;
+      padding: 10px;
       margin: 10px 0;
-      width: 100%;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-    }
-    .upgrade h3, .ups h3 {
-      margin-top: 0;
-      color: #b03060;
-    }
-    .upgrade button, .ups button, #resurrectBtn, .choiceBtn {
-      background: #ff69b4;
-      border: none;
-      color: white;
-      padding: 10px 20px;
       border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      margin: 5px;
+      background: #fff;
     }
-    .upgrade button:hover, .ups button:hover, #resurrectBtn:hover, .choiceBtn:hover {
-      background: #ff1493;
+    button {
+      background: #e91e63;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #c2185b;
     }
     .lollipop {
       position: absolute;
+      width: 60px;
       cursor: pointer;
-      width: 100px;
-      height: 100px;
-      z-index: 999;
+      z-index: 10;
     }
     #multiplierOverlay {
       position: fixed;
@@ -85,50 +67,23 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(255, 215, 0, 0.3);
-      z-index: 9999;
-      display: none;
+      background: rgba(255, 215, 0, 0.2);
+      z-index: 9;
       pointer-events: none;
+      display: none;
     }
     .candy {
       position: fixed;
       top: -50px;
-      width: 40px;
-      height: 40px;
-      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Emoji_u1f36c.svg/1024px-Emoji_u1f36c.svg.png') no-repeat center center / contain;
-      animation: fall linear;
-      z-index: 0;
+      width: 30px;
+      height: 30px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Emoji_u1f36c.svg/1024px-Emoji_u1f36c.svg.png') no-repeat center/contain;
+      animation: fall 5s linear forwards;
     }
     @keyframes fall {
       to {
         transform: translateY(110vh);
       }
-    }
-    #resurrection {
-      text-align: center;
-      margin-top: 20px;
-      transition: background 1s;
-    }
-    #resurrection.flash {
-      background: #ffffcc;
-      animation: flashGlow 1s ease-in-out 3;
-    }
-    @keyframes flashGlow {
-      0%, 100% { background-color: #ffffcc; }
-      50% { background-color: #ffee99; }
-    }
-    #choiceModal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      padding: 30px;
-      border: 2px solid #ff69b4;
-      border-radius: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      display: none;
-      z-index: 10000;
     }
   </style>
 </head>
@@ -139,11 +94,9 @@
     <div id="stats">
       <div id="umyum" onclick="clickUmyum()">🍬</div>
       <p><strong>Umyums:</strong> <span id="count">0</span></p>
-      <p><strong>Umyums Per Second (UPS):</strong> <span id="ups">0</span></p>
-      <div id="resurrection">
-        <p><strong>Bunny Resurrections:</strong> <span id="resurrections">0</span></p>
-        <button id="resurrectBtn" onclick="tryResurrect()">Bunny Resurrection</button>
-      </div>
+      <p><strong>UPS:</strong> <span id="ups">0</span></p>
+      <p><strong>Resurrections:</strong> <span id="resurrections">0</span></p>
+      <button onclick="tryResurrect()">Bunny Resurrection</button>
     </div>
     <div id="sidebar">
       <h2>Click Upgrades</h2>
@@ -151,12 +104,6 @@
       <h2>Auto Umyums</h2>
       <div id="autoUpgrades"></div>
     </div>
-  </div>
-
-  <div id="choiceModal">
-    <p>Choose your resurrection bonus:</p>
-    <button class="choiceBtn" onclick="chooseBonus('ups')">2x UPS</button>
-    <button class="choiceBtn" onclick="chooseBonus('click')">2x UPC</button>
   </div>
 
   <script>
@@ -169,7 +116,7 @@
 
     function formatNumber(num) {
       if (num < 1e6) return Math.round(num).toString();
-      const units = ['million', 'billion', 'trillion', 'quadrillion', 'quintillion', 'sextillion', 'septillion', 'octillion', 'nonillion', 'decillion'];
+      const units = ['million','billion','trillion','quadrillion','quintillion','sextillion','septillion','octillion','nonillion','decillion'];
       let unitIndex = -1;
       while (num >= 1000 && unitIndex < units.length - 1) {
         num /= 1000;
@@ -185,11 +132,11 @@
 
     function updateDisplay() {
       document.getElementById('count').textContent = formatNumber(umyums);
-      document.getElementById('ups').textContent = (ups * upsMultiplier).toFixed(2);
+      document.getElementById('ups').textContent = Math.round(ups * upsMultiplier);
       document.getElementById('resurrections').textContent = resurrectionCount;
     }
 
-    function createUpgrade(name, baseCost, isAuto = false) {
+    function createUpgrade(name, baseCost, isAuto = false, production = 1) {
       const div = document.createElement('div');
       div.className = isAuto ? 'ups' : 'upgrade';
       const title = document.createElement('h3');
@@ -202,12 +149,9 @@
       button.onclick = function () {
         if (umyums >= cost) {
           umyums -= cost;
-          if (isAuto) {
-            ups += 1;
-          } else {
-            clickPower += 1;
-          }
-          cost *= 1.03;
+          if (isAuto) ups += production;
+          else clickPower += production;
+          cost *= 1.05;
           costDisplay.textContent = `Cost: ${formatNumber(cost)} umyums`;
           updateDisplay();
         }
@@ -218,19 +162,11 @@
       document.getElementById(isAuto ? 'autoUpgrades' : 'clickUpgrades').appendChild(div);
     }
 
-    const clickUpgradeNames = [
-      "Candy Tapper", "Sugar Smash", "Lick Boost", "Sweet Press", "Caramel Click", "Fudge Flick",
-      "Syrup Snap", "Marshmallow Mash", "Gummy Grab", "Taffy Touch", "Chocolate Chop",
-      "Lollipop Launch", "Cotton Crush", "Nougat Nudge", "Honey Hit", "Bonbon Bash"
-    ];
+    const clickUpgradeNames = ["Candy Tapper", "Sugar Smash", "Lick Boost", "Sweet Press"];
+    const autoUpgradeNames = ["Candy Machine", "Auto Chewer", "Gumball Gear", "Sugar Synth"];
 
-    const autoUpgradeNames = [
-      "Candy Machine", "Auto Chewer", "Gumball Gear", "Sugar Synthesizer", "Umyum Extractor",
-      "Lollipop Leech", "Caramel Conveyor", "Sweet Sprayer", "Toffee Timer", "Candy Cloner"
-    ];
-
-    clickUpgradeNames.forEach((name, i) => createUpgrade(name, 10 * Math.pow(1.5, i)));
-    autoUpgradeNames.forEach((name, i) => createUpgrade(name, 500 * Math.pow(2, i), true));
+    clickUpgradeNames.forEach((name, i) => createUpgrade(name, Math.pow(10, i + 1), false, 1));
+    autoUpgradeNames.forEach((name, i) => createUpgrade(name, Math.pow(10, i + 1), true, 0.1 * (i + 1)));
 
     setInterval(() => {
       umyums += ups * upsMultiplier;
@@ -254,37 +190,30 @@
       const candy = document.createElement('div');
       candy.className = 'candy';
       candy.style.left = Math.random() * window.innerWidth + 'px';
-      candy.style.animationDuration = (3 + Math.random() * 2) + 's';
       document.body.appendChild(candy);
       setTimeout(() => candy.remove(), 6000);
     }
 
     setInterval(dropCandy, 500);
     setInterval(() => {
-      if (!document.querySelector('.lollipop')) {
-        spawnLollipop();
-      }
+      if (!document.querySelector('.lollipop')) spawnLollipop();
     }, (Math.random() * 2 + 3) * 60 * 1000);
 
     function tryResurrect() {
       const required = 1e21 * Math.pow(2, resurrectionCount);
       if (umyums >= required) {
-        document.getElementById('choiceModal').style.display = 'block';
+        const choice = prompt('Choose bonus: type \"ups\" for 2x UPS or \"click\" for 2x UPC');
+        if (choice === 'ups') upsMultiplier *= 2;
+        else if (choice === 'click') upcMultiplier *= 2;
+        umyums = 0;
+        ups = 0;
+        clickPower = 1;
+        resurrectionCount++;
+        updateDisplay();
+        alert(`Resurrected! ${choice === 'ups' ? 'UPS' : 'UPC'} is now doubled.`);
       } else {
-        alert(`You need ${required.toExponential()} umyums to resurrect!`);
+        alert(`You need ${formatNumber(required)} umyums to resurrect.`);
       }
-    }
-
-    function chooseBonus(choice) {
-      document.getElementById('choiceModal').style.display = 'none';
-      umyums = 0;
-      ups = 0;
-      clickPower = 1;
-      resurrectionCount++;
-      if (choice === 'ups') upsMultiplier *= 2;
-      else upcMultiplier *= 2;
-      updateDisplay();
-      alert(`Resurrected! ${choice === 'ups' ? 'UPS' : 'UPC'} is now doubled.`);
     }
   </script>
 </body>
