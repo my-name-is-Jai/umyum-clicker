@@ -9,7 +9,7 @@
       font-family: sans-serif;
       background: #ffeff7;
       margin: 0;
-      overflow: hidden;
+      overflow-x: hidden;
     }
     h1 {
       text-align: center;
@@ -18,13 +18,14 @@
     #main-content {
       display: flex;
       justify-content: space-between;
+      height: calc(100vh - 100px);
       padding: 10px;
     }
     #umyum {
       font-size: 5em;
       cursor: pointer;
       display: block;
-      margin: 0 auto;
+      margin: 20px auto;
     }
     #stats {
       text-align: center;
@@ -36,6 +37,7 @@
       border-left: 2px solid #e91e63;
       padding: 10px;
       overflow-y: auto;
+      height: 100%;
     }
     .upgrade, .ups {
       border: 1px solid #e91e63;
@@ -143,21 +145,27 @@
       title.textContent = name;
       const costDisplay = document.createElement('p');
       costDisplay.textContent = `Cost: ${formatNumber(baseCost)} umyums`;
+      const countDisplay = document.createElement('p');
+      countDisplay.textContent = `Owned: 0`;
       const button = document.createElement('button');
       button.textContent = 'Buy';
       let cost = baseCost;
+      let count = 0;
       button.onclick = function () {
         if (umyums >= cost) {
           umyums -= cost;
           if (isAuto) ups += production;
           else clickPower += production;
           cost *= 1.05;
+          count++;
           costDisplay.textContent = `Cost: ${formatNumber(cost)} umyums`;
+          countDisplay.textContent = `Owned: ${count}`;
           updateDisplay();
         }
       };
       div.appendChild(title);
       div.appendChild(costDisplay);
+      div.appendChild(countDisplay);
       div.appendChild(button);
       document.getElementById(isAuto ? 'autoUpgrades' : 'clickUpgrades').appendChild(div);
     }
