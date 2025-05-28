@@ -2,137 +2,158 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Umyum Clicker</title>
   <style>
-    body { font-family: Arial; text-align: center; background: #f0f8ff; }
-    #umyum { font-size: 100px; cursor: pointer; }
-    .upgrade, .generator { margin: 10px; border: 1px solid #000; padding: 5px; cursor: pointer; }
-    #bunny { position: absolute; display: none; font-size: 50px; cursor: pointer; }
+    body { font-family: Arial, sans-serif; text-align: center; background: #fff8f0; position: relative; }
+    h1 { font-size: 2.5em; }
+    #umyum { font-size: 3em; cursor: pointer; }
+    .upgrade, .ups { margin: 10px auto; width: 80%; max-width: 600px; background: #eee; padding: 10px; border-radius: 8px; }
+    .bunny { position: absolute; cursor: pointer; width: 100px; height: 100px; }
+    #multiplierOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255, 215, 0, 0.3);
+      z-index: 9999;
+      display: none;
+      pointer-events: none;
+    }
+    #multiplierTimer {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: gold;
+      color: black;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-weight: bold;
+      display: none;
+      z-index: 10000;
+    }
   </style>
 </head>
 <body>
   <h1>Umyum Clicker</h1>
-  <div>Umyums: <span id="umyumCount">0</span></div>
-  <div id="umyum">😋</div>
-
-  <h2>Upgrades (Per Click)</h2>
-  <div id="upgrades"></div>
-
-  <h2>Generators (UPS)</h2>
-  <div id="generators"></div>
-
-  <div id="bunny">🐰</div>
+  <div id="umyum" onclick="clickUmyum()">🍬 Click Me!</div>
+  <p><strong>Umyums:</strong> <span id="count">0</span></p>
+  <p><strong>Umyums Per Second (UPS):</strong> <span id="ups">0</span></p>
+  <div id="upgrades"><h2>Click Upgrades</h2></div>
+  <div id="autoUpgrades"><h2>Auto Umyums</h2></div>
+  <div id="bunny"></div>
+  <div id="multiplierOverlay"></div>
+  <div id="multiplierTimer">60s</div>
 
   <script>
     let umyums = 0;
-    let umyumPerClick = 1;
-    let umyumPerSecond = 0;
+    let ups = 0;
+    let clickPower = 1;
     let multiplier = 1;
+    let multiplierInterval;
+    let timeRemaining = 60;
 
-    const umyumCountEl = document.getElementById("umyumCount");
-    const upgradesEl = document.getElementById("upgrades");
-    const generatorsEl = document.getElementById("generators");
-    const bunnyEl = document.getElementById("bunny");
-
-    const upgrades = [];
-    const generators = [];
-
-    function calculateUpgradeCost(i) {
-      const minCost = 10;
-      const maxCost = 3 * 10**75;
-      const factor = Math.pow(maxCost / minCost, 1 / 74);
-      return Math.round(minCost * Math.pow(factor, i));
+    function clickUmyum() {
+      umyums += clickPower * multiplier;
+      updateDisplay();
     }
 
-    for (let i = 0; i < 75; i++) {
-      upgrades.push({
-        name: `Upgrade ${i+1}`,
-        cost: calculateUpgradeCost(i),
-        bought: 0,
-      });
+    function updateDisplay() {
+      document.getElementById('count').textContent = Math.floor(umyums);
+      document.getElementById('ups').textContent = ups;
     }
 
-    for (let i = 0; i < 10; i++) {
-      generators.push({
-        name: `Generator ${i+1}`,
-        cost: 100 * Math.pow(2, i),
-        ups: Math.pow(2, i),
-        bought: 0,
-      });
-    }
+    function createUpgrade(name, baseCost, isAuto = false) {
+      const div = document.createElement('div');
+      div.className = isAuto ? 'ups' : 'upgrade';
+      const label = document.createElement('span');
+      label.textContent = `${name} - ${baseCost} umyums`;
+      const button = document.createElement('button');
+      button.textContent = 'Buy';
 
-    function updateUI() {
-      umyumCountEl.textContent = Math.floor(umyums);
-      upgradesEl.innerHTML = "";
-      upgrades.forEach((u, i) => {
-        const div = document.createElement("div");
-        div.className = "upgrade";
-        div.textContent = `${u.name} (+${i+1} click) - Cost: ${u.cost} - Owned: ${u.bought}`;
-        div.onclick = () => {
-          if (umyums >= u.cost) {
-            umyums -= u.cost;
-            u.bought++;
-            umyumPerClick += (i+1);
-            u.cost = Math.round(u.cost * 1.03);
-            updateUI();
+      let cost = baseCost;
+      button.onclick = function () {
+        if (umyums >= cost) {
+          umyums -= cost;
+          if (isAuto) {
+            ups += 1;
+          } else {
+            clickPower += 1;
           }
-        };
-        upgradesEl.appendChild(div);
-      });
+          cost *= 1.03;
+          label.textContent = `${name} - ${Math.floor(cost)} umyums`;
+          updateDisplay();
+        }
+      };
 
-      generatorsEl.innerHTML = "";
-      generators.forEach((g, i) => {
-        const div = document.createElement("div");
-        div.className = "generator";
-        div.textContent = `${g.name} (+${g.ups} UPS) - Cost: ${g.cost} - Owned: ${g.bought}`;
-        div.onclick = () => {
-          if (umyums >= g.cost) {
-            umyums -= g.cost;
-            g.bought++;
-            umyumPerSecond += g.ups;
-            g.cost = Math.round(g.cost * 1.15);
-            updateUI();
-          }
-        };
-        generatorsEl.appendChild(div);
-      });
+      div.appendChild(label);
+      div.appendChild(button);
+      (isAuto ? document.getElementById('autoUpgrades') : document.getElementById('upgrades')).appendChild(div);
     }
 
-    document.getElementById("umyum").onclick = () => {
-      umyums += umyumPerClick * multiplier;
-      updateUI();
-    };
+    const upgradeNames = Array.from({ length: 75 }, (_, i) => `Upgrade #${i + 1}`);
+    const wordPrices = [
+      "10", "101", "1 thousand, 30", "10 thousand, 455", "106 thousand, 118",
+      "1 million, 77 thousand, 55", "10 million, 931 thousand, 644", "110 million, 951 thousand, 477",
+      "1 billion, 126 million, 109 thousand, 639", "11 billion, 429 million, 527 thousand, 73",
+      "116 billion, 481 million, 224 thousand, 170", "1 trillion, 187 billion, 41 million, 25 thousand, 363",
+      "12 trillion, 98 billion, 478 million, 304 thousand, 835", "128 trillion, 100 billion, 725 million, 203 thousand, 412",
+      "1 quadrillion, 311 trillion, 892 billion, 332 million, 262 thousand, 801", "13 quadrillion, 447 trillion, 143 billion, 122 million, 529 thousand, 521",
+      "137 quadrillion, 894 trillion, 184 billion, 371 million, 777 thousand, 723", "1 quintillion, 414 quadrillion, 445 trillion, 861 billion, 283 million, 141 thousand, 684",
+      "14 quintillion, 506 quadrillion, 841 trillion, 571 billion, 442 million, 576 thousand, 693",
+      "149 quintillion, 842 quadrillion, 273 trillion, 160 billion, 581 million, 499 thousand, 870",
+      "1 sextillion, 547 quintillion, 704 quadrillion, 264 trillion, 964 billion, 206 million, 110 thousand, 376",
+      "15 sextillion, 576 quintillion, 299 quadrillion, 605 trillion, 430 billion, 209 million, 120 thousand, 776",
+      "160 sextillion, 861 quintillion, 199 quadrillion, 940 trillion, 236 billion, 442 million, 346 thousand, 486",
+      "1 septillion, 661 sextillion, 324 quintillion, 507 quadrillion, 976 trillion, 152 billion, 331 million, 650 thousand, 577",
+      "16 septillion, 699 sextillion, 270 quintillion, 135 quadrillion, 208 trillion, 974 billion, 724 million, 408 thousand, 925",
+      "170 septillion, 957 sextillion, 264 quintillion, 786 quadrillion, 248 trillion, 974 billion, 471 million, 939 thousand, 234",
+      "1 octillion, 750 septillion, 883 sextillion, 499 quintillion, 540 quadrillion, 960 trillion, 998 billion, 402 million, 431 thousand, 710",
+      "17 octillion, 831 septillion, 301 sextillion, 466 quintillion, 407 quadrillion, 334 trillion, 335 billion, 953 million, 152 thousand, 860",
+      "181 octillion, 786 septillion, 340 sextillion, 794 quintillion, 826 quadrillion, 334 trillion, 875 billion, 267 million, 929 thousand, 324",
+      "1 nonillion, 849 octillion, 800 septillion, 984 sextillion, 624 quintillion, 117 quadrillion, 911 trillion, 690 billion, 417 million, 493 thousand, 276",
+      "3 quattuorvigintillion"
+    ];
+
+    upgradeNames.forEach((name, i) => {
+      createUpgrade(name, i < wordPrices.length ? parseInt(wordPrices[i].replace(/[^\d]/g, "")) : 10 ** (i + 1), i >= 37);
+    });
 
     setInterval(() => {
-      umyums += umyumPerSecond * multiplier;
-      updateUI();
+      umyums += ups * multiplier;
+      updateDisplay();
     }, 1000);
 
     function spawnBunny() {
-      const x = Math.random() * (window.innerWidth - 50);
-      const y = Math.random() * (window.innerHeight - 50);
-      const mult = Math.floor(Math.random() * 9) + 2;
-      bunnyEl.style.left = `${x}px`;
-      bunnyEl.style.top = `${y}px`;
-      bunnyEl.style.fontSize = `${30 + mult * 5}px`;
-      bunnyEl.style.display = "block";
+      const bunny = document.createElement('img');
+      bunny.src = 'https://upload.wikimedia.org/wikipedia/commons/7/70/Rabbit_in_montana.jpg';
+      bunny.className = 'bunny';
+      bunny.style.top = Math.random() * window.innerHeight + 'px';
+      bunny.style.left = Math.random() * window.innerWidth + 'px';
+      bunny.onclick = () => {
+        const multi = Math.floor(Math.random() * 9 + 2);
+        multiplier = multi;
+        document.getElementById('multiplierOverlay').style.display = 'block';
+        document.getElementById('multiplierTimer').style.display = 'block';
+        timeRemaining = 60;
+        document.getElementById('multiplierTimer').textContent = timeRemaining + 's';
 
-      bunnyEl.onclick = () => {
-        multiplier = mult;
-        bunnyEl.style.display = "none";
-        setTimeout(() => multiplier = 1, 60000);
+        clearInterval(multiplierInterval);
+        multiplierInterval = setInterval(() => {
+          timeRemaining--;
+          document.getElementById('multiplierTimer').textContent = timeRemaining + 's';
+          if (timeRemaining <= 0) {
+            clearInterval(multiplierInterval);
+            multiplier = 1;
+            document.getElementById('multiplierOverlay').style.display = 'none';
+            document.getElementById('multiplierTimer').style.display = 'none';
+          }
+        }, 1000);
+
+        bunny.remove();
       };
-
-      setTimeout(() => {
-        bunnyEl.style.display = "none";
-      }, 3000);
+      document.body.appendChild(bunny);
     }
-
-    setInterval(() => {
-      if (Math.random() < 1) spawnBunny();
-    }, Math.random() * 2 * 60000 + 180000);
-
-    updateUI();
+    setInterval(spawnBunny, (Math.random() * 2 + 3) * 60 * 1000);
   </script>
 </body>
 </html>
