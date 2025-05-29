@@ -6,56 +6,73 @@
   <title>Umyum Clicker</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-image: url('497bf273-cdc4-4652-9aaa-e8a7accc990a.png');
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive;
+      background: url('file-E3dgR7tnqMCunzQ1zBtE8f') repeat;
       background-size: cover;
-      background-repeat: no-repeat;
-      color: #333;
-      text-align: center;
+      color: #fff;
+      display: flex;
+      overflow: hidden;
     }
-    .bunny {
-      font-size: 40px;
-      cursor: pointer;
-      position: absolute;
-    }
-    #golden-timer {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 24px;
-      color: gold;
-      display: none;
-    }
-    #sidebar {
-      position: fixed;
-      top: 100px;
-      right: 20px;
-      background-color: rgba(255,255,255,0.8);
+    .sidebar {
+      width: 300px;
+      background-color: rgba(0, 0, 0, 0.5);
       padding: 10px;
-      border-radius: 10px;
+      overflow-y: auto;
+      height: 100vh;
+    }
+    .main {
+      flex-grow: 1;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+    .umyum {
       width: 200px;
-      text-align: left;
+      cursor: pointer;
     }
     .upgrade {
-      margin-bottom: 10px;
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    #bunny {
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 64px;
+      cursor: pointer;
+      display: none;
+    }
+    #timerBar {
+      width: 100%;
+      height: 5px;
+      background: gold;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: none;
+    }
+    .golden-hue {
+      filter: hue-rotate(45deg) brightness(1.2);
     }
   </style>
 </head>
 <body>
-  <h1>Umyum Clicker</h1>
-  <p><strong>Umyums:</strong> <span id="count">0</span></p>
-  <p><strong>Umyums per Click:</strong> <span id="upc">1.0</span></p>
-  <p><strong>UPS:</strong> <span id="ups">0.0</span></p>
-  <p><strong>Resurrections:</strong> <span id="resurrections">0</span></p>
-  <div id="golden-timer">Multiplier active: <span id="timer">60</span>s</div>
-
-  <button onclick="clickUmyum()">Click Umyum</button>
-  <div id="sidebar">
-    <h3>Upgrades</h3>
-    <div id="upgrade-list"></div>
+  <div class="sidebar" id="upgrades"></div>
+  <div class="main" id="main">
+    <div id="timerBar"></div>
+    <h1>Umyum Clicker</h1>
+    <img src="umyum.png" class="umyum" id="umyum" alt="Umyum">
+    <p><strong>Umyums:</strong> <span id="count">0</span></p>
+    <p><strong>UPS:</strong> <span id="ups">0.0</span></p>
+    <p><strong>UPC:</strong> <span id="upc">1.0</span></p>
+    <p><strong>Resurrections:</strong> <span id="resurrections">0</span></p>
+    <div id="bunny">🐰</div>
   </div>
-
   <script>
     let umyums = 0;
     let clickPower = 1;
@@ -63,14 +80,29 @@
     let upsMultiplier = 1;
     let upcMultiplier = 1;
     let resurrectionCount = 0;
-    let multiplierActive = false;
-    let multiplierEndTime = 0;
+    let bunnyTimeout;
 
     const upgrades = [
       { name: "Candy Tapper", baseCost: 10, type: "click", effect: 1, quantity: 0 },
       { name: "Sugar Machine", baseCost: 100, type: "auto", effect: 0.1, quantity: 0 },
-      { name: "Lollipop Miner", baseCost: 1000, type: "auto", effect: 1, quantity: 0 }
+      { name: "Lollipop Miner", baseCost: 1000, type: "auto", effect: 1, quantity: 0 },
+      { name: "Chocolate Stream", baseCost: 10000, type: "auto", effect: 5, quantity: 0 },
+      { name: "Caramel Cauldron", baseCost: 100000, type: "click", effect: 10, quantity: 0 },
+      { name: "Syrup Refinery", baseCost: 1000000, type: "auto", effect: 50, quantity: 0 },
+      { name: "Sugarcane Fields", baseCost: 10000000, type: "auto", effect: 200, quantity: 0 },
+      { name: "Gummy Lab", baseCost: 100000000, type: "click", effect: 100, quantity: 0 },
+      { name: "Marshmallow Forge", baseCost: 1000000000, type: "auto", effect: 1000, quantity: 0 },
+      { name: "Bunny Universe", baseCost: 10000000000, type: "auto", effect: 5000, quantity: 0 }
     ];
+
+    function formatNumber(num) {
+      const units = ["", " thousand", " million", " billion", " trillion", " quadrillion", " quintillion", " sextillion"];
+      if (num < 1000000) return num.toLocaleString();
+      let unitIndex = Math.floor(Math.log10(num) / 3);
+      let unitValue = Math.pow(10, unitIndex * 3);
+      let scaled = num / unitValue;
+      return scaled.toFixed(3) + units[unitIndex];
+    }
 
     function updateDisplay() {
       document.getElementById('count').textContent = formatNumber(umyums);
@@ -79,93 +111,75 @@
       document.getElementById('resurrections').textContent = resurrectionCount;
     }
 
-    function formatNumber(num) {
-      if (num >= 1e21) return (num / 1e21).toFixed(3) + ' sextillion';
-      if (num >= 1e18) return (num / 1e18).toFixed(3) + ' quintillion';
-      if (num >= 1e15) return (num / 1e15).toFixed(3) + ' quadrillion';
-      if (num >= 1e12) return (num / 1e12).toFixed(3) + ' trillion';
-      if (num >= 1e9) return (num / 1e9).toFixed(3) + ' billion';
-      if (num >= 1e6) return (num / 1e6).toFixed(3) + ' million';
-      return num.toFixed(1);
-    }
-
-    function clickUmyum() {
-      umyums += clickPower * upcMultiplier;
-      updateDisplay();
-    }
-
-    function spawnBunny() {
-      const bunny = document.createElement('div');
-      bunny.textContent = Math.random() > 0.5 ? '🐇' : '🐰';
-      bunny.className = 'bunny';
-      bunny.style.top = Math.random() * (window.innerHeight - 50) + 'px';
-      bunny.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-      document.body.appendChild(bunny);
-
-      bunny.addEventListener('click', () => {
-        multiplierActive = true;
-        multiplierEndTime = Date.now() + 60000;
-        upcMultiplier *= 7;
-        document.getElementById('golden-timer').style.display = 'block';
-        document.body.style.backgroundColor = 'gold';
-        document.body.removeChild(bunny);
-      });
-
-      setTimeout(() => {
-        if (document.body.contains(bunny)) document.body.removeChild(bunny);
-      }, 10000);
-    }
-
     function generateUpgradeList() {
-      const list = document.getElementById('upgrade-list');
-      list.innerHTML = '';
-      upgrades.forEach((u, i) => {
-        const cost = Math.floor(u.baseCost * Math.pow(1.3, u.quantity));
-        const btn = document.createElement('button');
-        btn.textContent = `${u.name} (${u.quantity}) - ${formatNumber(cost)}`;
-        btn.className = 'upgrade';
-        btn.onclick = () => buyUpgrade(i);
-        list.appendChild(btn);
+      const container = document.getElementById('upgrades');
+      container.innerHTML = '';
+      upgrades.forEach((upg, index) => {
+        const cost = upg.baseCost * Math.pow(1.3, upg.quantity);
+        const upgradeDiv = document.createElement('div');
+        upgradeDiv.className = 'upgrade';
+        upgradeDiv.textContent = `${upg.name} (${formatNumber(cost)}) [${upg.quantity}]`;
+        upgradeDiv.onclick = () => buyUpgrade(index);
+        container.appendChild(upgradeDiv);
       });
     }
 
     function buyUpgrade(index) {
       const upgrade = upgrades[index];
-      const cost = Math.floor(upgrade.baseCost * Math.pow(1.3, upgrade.quantity));
+      const cost = upgrade.baseCost * Math.pow(1.3, upgrade.quantity);
       if (umyums >= cost) {
         umyums -= cost;
         upgrade.quantity++;
-        if (upgrade.type === 'click') clickPower += upgrade.effect;
-        if (upgrade.type === 'auto') ups += upgrade.effect;
+        if (upgrade.type === "click") clickPower += upgrade.effect;
+        else if (upgrade.type === "auto") ups += upgrade.effect;
         updateDisplay();
         generateUpgradeList();
       }
     }
 
-    setInterval(() => {
-      umyums += (ups * upsMultiplier) / 10;
-      updateDisplay();
-    }, 100);
+    function spawnBunny() {
+      const bunny = document.getElementById('bunny');
+      bunny.textContent = Math.random() < 0.5 ? '🐇' : '🐰';
+      bunny.style.display = 'block';
+      setTimeout(() => bunny.style.display = 'none', 5000);
+    }
 
-    setInterval(() => {
-      if (Math.random() < 0.01) spawnBunny();
-    }, 3000);
+    document.getElementById('bunny').addEventListener('click', () => {
+      document.getElementById('main').classList.add('golden-hue');
+      upsMultiplier *= 7;
+      upcMultiplier *= 7;
+      document.getElementById('bunny').style.display = 'none';
+      document.getElementById('timerBar').style.display = 'block';
+      document.getElementById('timerBar').style.width = '100%';
 
-    setInterval(() => {
-      if (multiplierActive) {
-        const timeLeft = Math.max(0, Math.floor((multiplierEndTime - Date.now()) / 1000));
-        document.getElementById('timer').textContent = timeLeft;
-        if (timeLeft <= 0) {
-          multiplierActive = false;
+      let time = 60;
+      const interval = setInterval(() => {
+        time--;
+        document.getElementById('timerBar').style.width = `${(time / 60) * 100}%`;
+        if (time <= 0) {
+          clearInterval(interval);
+          upsMultiplier /= 7;
           upcMultiplier /= 7;
-          document.getElementById('golden-timer').style.display = 'none';
-          document.body.style.backgroundColor = '';
+          document.getElementById('main').classList.remove('golden-hue');
+          document.getElementById('timerBar').style.display = 'none';
         }
-      }
-    }, 500);
+      }, 1000);
+    });
 
-    updateDisplay();
+    document.getElementById('umyum').addEventListener('click', () => {
+      umyums += clickPower * upcMultiplier;
+      updateDisplay();
+    });
+
+    setInterval(() => {
+      umyums += ups * upsMultiplier;
+      updateDisplay();
+    }, 1000);
+
+    setInterval(spawnBunny, Math.random() * 120000 + 180000); // every 3–5 mins
+
     generateUpgradeList();
+    updateDisplay();
   </script>
 </body>
 </html>
