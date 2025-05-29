@@ -7,13 +7,14 @@
   <style>
     body {
       font-family: sans-serif;
-      background: #ffeff7;
+      background: linear-gradient(to bottom, #fff0f5, #ffd1dc);
       margin: 0;
       overflow-x: hidden;
     }
     h1 {
       text-align: center;
       color: #e91e63;
+      animation: pulse 2s infinite;
     }
     #main-content {
       display: flex;
@@ -26,6 +27,10 @@
       cursor: pointer;
       display: block;
       margin: 20px auto;
+      transition: transform 0.2s ease-in-out;
+    }
+    #umyum:active {
+      transform: scale(1.2);
     }
     #stats {
       text-align: center;
@@ -45,6 +50,11 @@
       margin: 10px 0;
       border-radius: 8px;
       background: #fff;
+      transition: transform 0.2s ease;
+    }
+    .upgrade:hover, .ups:hover {
+      transform: translateX(5px);
+      background-color: #ffe0ec;
     }
     button {
       background: #e91e63;
@@ -53,6 +63,7 @@
       padding: 8px 12px;
       border-radius: 6px;
       cursor: pointer;
+      transition: background 0.3s ease;
     }
     button:hover {
       background: #c2185b;
@@ -87,6 +98,18 @@
         transform: translateY(110vh);
       }
     }
+    @keyframes pulse {
+      0% { text-shadow: 0 0 5px #e91e63; }
+      50% { text-shadow: 0 0 20px #ff4081; }
+      100% { text-shadow: 0 0 5px #e91e63; }
+    }
+    .resurrection-glow {
+      animation: glow 2s infinite alternate;
+    }
+    @keyframes glow {
+      from { box-shadow: 0 0 5px #ff9800; }
+      to { box-shadow: 0 0 20px #ffc107; }
+    }
   </style>
 </head>
 <body>
@@ -98,9 +121,9 @@
       <p><strong>Umyums:</strong> <span id="count">0</span></p>
       <p><strong>Umyums per Click:</strong> <span id="upc">1.0 Umyums/click</span></p>
       <p><strong>UPS:</strong> <span id="ups">0.0 Umyums/sec</span></p>
-      <p><strong>Total Umyums per Click:</strong> <span id="upcTracker">1.0 Umyums/click</span></p>
+      <p><strong>Total UPC:</strong> <span id="upcTracker">1.0 Umyums/click</span></p>
       <p><strong>Resurrections:</strong> <span id="resurrections">0</span></p>
-      <button onclick="tryResurrect()">Bunny Resurrection</button>
+      <button id="resurrectButton" onclick="tryResurrect()">Bunny Resurrection</button>
     </div>
     <div id="sidebar">
       <h2>Click Upgrades</h2>
@@ -140,6 +163,11 @@
       document.getElementById('upc').textContent = (clickPower * upcMultiplier).toFixed(1) + ' Umyums/click';
       document.getElementById('upcTracker').textContent = (clickPower * upcMultiplier).toFixed(1) + ' Umyums/click';
       document.getElementById('resurrections').textContent = resurrectionCount;
+
+      const required = 1e21 * Math.pow(2, resurrectionCount);
+      const button = document.getElementById('resurrectButton');
+      if (umyums >= required) button.classList.add('resurrection-glow');
+      else button.classList.remove('resurrection-glow');
     }
 
     function createUpgrade(name, baseCost, isAuto = false, production = 1) {
