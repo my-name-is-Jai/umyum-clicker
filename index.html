@@ -1,110 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Umyum Clicker</title>
   <style>
     body {
       font-family: sans-serif;
       margin: 0;
-      background: radial-gradient(circle, #fff0f5 0%, #ff80ab 100%);
-      overflow-x: hidden;
+      overflow: hidden;
+      background: radial-gradient(circle, #ffe0f0 0%, #ffb6c1 100%);
     }
     h1 {
       text-align: center;
       color: #e91e63;
-      margin: 10px 0;
+      margin-top: 10px;
     }
-    #news {
-      background: #ffe6f0;
-      padding: 5px 10px;
-      font-weight: bold;
-      white-space: nowrap;
-      overflow: hidden;
-      border-bottom: 2px solid #e91e63;
-      position: relative;
-    }
-    #news span {
-      position: absolute;
-      animation: scrollNews 15s linear infinite;
-    }
-    @keyframes scrollNews {
-      0% { left: 100%; }
-      100% { left: -100%; }
-    }
-
     #tabs {
+      position: fixed;
+      top: 60px;
+      left: 0;
+      width: 160px;
+      height: 100%;
+      background: #fff0f5;
       display: flex;
-      justify-content: center;
-      gap: 10px;
-      padding: 10px;
-      background: #ffeef5;
-      border-bottom: 2px solid #e91e63;
+      flex-direction: column;
+      border-right: 2px solid #e91e63;
+      z-index: 2;
     }
-    .tab-button {
-      padding: 8px 16px;
+    #tabs button {
+      padding: 15px;
       border: none;
-      background: #f8bbd0;
-      color: #880e4f;
+      border-bottom: 1px solid #e91e63;
+      background: none;
       font-weight: bold;
-      border-radius: 5px;
       cursor: pointer;
     }
-    .tab-button.active {
-      background: #e91e63;
-      color: white;
+    #tabs button:hover, #tabs button.active {
+      background: #f8bbd0;
     }
-
     .tab-content {
-      display: none;
+      margin-left: 160px;
       padding: 10px;
+      display: none;
     }
     .tab-content.active {
       display: block;
     }
-
     #umyum {
       font-size: 5em;
       cursor: pointer;
       display: block;
       margin: 20px auto;
-      transition: transform 0.25s, filter 0.25s;
+      transition: transform 0.25s ease, filter 0.25s ease;
     }
     #umyum.clicked {
       transform: scale(1.2);
-      filter: brightness(1.3);
+      filter: brightness(1.5);
     }
-
-    .section {
-      max-width: 800px;
-      margin: auto;
-    }
-
-    .upgrade {
-      background: #fff0f5;
+    .upgrade, .ups {
       border: 1px solid #e91e63;
-      border-radius: 10px;
-      margin: 10px;
       padding: 10px;
+      margin: 10px;
+      border-radius: 8px;
+      background: #fff;
     }
-
+    button {
+      background: #e91e63;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #newsBar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: #fce4ec;
+      color: #880e4f;
+      white-space: nowrap;
+      overflow: hidden;
+      z-index: 3;
+    }
+    #newsText {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scrollNews 20s linear infinite;
+    }
+    @keyframes scrollNews {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
     .candy {
       position: fixed;
-      top: -30px;
+      top: -50px;
       width: 30px;
       height: 30px;
-      background: none;
-      font-size: 24px;
-      animation: fall 6s linear forwards;
       z-index: 0;
+      background: url('https://emojicdn.elk.sh/🍬') no-repeat center/contain;
+      animation: fall 5s linear forwards;
     }
     @keyframes fall {
-      to {
-        transform: translateY(110vh);
-      }
+      to { transform: translateY(110vh); }
     }
-
     #multiplierOverlay {
       position: fixed;
       top: 0;
@@ -112,97 +111,131 @@
       width: 100%;
       height: 100%;
       background: rgba(255, 215, 0, 0.2);
+      z-index: 1;
       pointer-events: none;
-      z-index: 2;
       display: none;
     }
-
-    #bunnyTimer {
-      text-align: center;
-      font-weight: bold;
-      color: #d50000;
-      margin-top: 5px;
-    }
-
-    .golden-bunny {
+    #goldenTimer {
       position: fixed;
-      z-index: 3;
-      font-size: 40px;
-      cursor: pointer;
+      top: 30px;
+      right: 20px;
+      background: gold;
+      color: black;
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: none;
+      z-index: 4;
+    }
+    .sparkle {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background: yellow;
+      border-radius: 50%;
+      animation: sparkle 1s linear forwards;
+      z-index: 2;
+    }
+    @keyframes sparkle {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(2); }
     }
   </style>
 </head>
 <body>
+  <div id="newsBar"><div id="newsText">Welcome to Umyum Clicker!</div></div>
   <h1>Umyum Clicker</h1>
-  <div id="news"><span id="newsText">Welcome to Umyum Clicker!</span></div>
-  <div id="tabs">
-    <button class="tab-button active" data-tab="stats">Stats</button>
-    <button class="tab-button" data-tab="upc">UPC Upgrades</button>
-    <button class="tab-button" data-tab="ups">UPS Upgrades</button>
-    <button class="tab-button" data-tab="res">Resurrection</button>
-  </div>
+  <div id="goldenTimer"></div>
   <div id="multiplierOverlay"></div>
 
-  <div id="main-content" class="section">
+  <div id="tabs">
+    <button class="tabBtn active" onclick="showTab('statsTab')">📊 Stats</button>
+    <button class="tabBtn" onclick="showTab('upcTab')">⬆️ UPC Upgrades</button>
+    <button class="tabBtn" onclick="showTab('upsTab')">⚙️ UPS Upgrades</button>
+    <button class="tabBtn" onclick="showTab('bunnyTab')">🐇 Bunny Resurrection</button>
+  </div>
+
+  <div id="statsTab" class="tab-content active">
     <div id="umyum" onclick="clickUmyum()">🍬</div>
-    <p id="bunnyTimer"></p>
+    <p><strong>Umyums:</strong> <span id="count">0</span></p>
+    <p><strong>UPC:</strong> <span id="upc">1</span></p>
+    <p><strong>UPS:</strong> <span id="ups">0</span></p>
+    <p><strong>Total UPC:</strong> <span id="upcTracker">1</span></p>
+    <p><strong>Resurrections:</strong> <span id="resurrections">0</span></p>
+  </div>
 
-    <div id="stats" class="tab-content active">
-      <p><strong>Umyums:</strong> <span id="count">0</span></p>
-      <p><strong>Umyums per Click:</strong> <span id="upc">1</span></p>
-      <p><strong>Total UPC:</strong> <span id="upcTracker">1</span></p>
-      <p><strong>UPS:</strong> <span id="ups">0</span></p>
-      <p><strong>Resurrections:</strong> <span id="resCount">0</span></p>
-    </div>
-
-    <div id="upc" class="tab-content"></div>
-    <div id="ups" class="tab-content"></div>
-
-    <div id="res" class="tab-content">
-      <button onclick="tryResurrect()">Bunny Resurrection</button>
-    </div>
+  <div id="upcTab" class="tab-content"></div>
+  <div id="upsTab" class="tab-content"></div>
+  <div id="bunnyTab" class="tab-content">
+    <button onclick="tryResurrect()">Resurrect Bunny</button>
   </div>
 
   <script>
-    let umyums = 0;
-    let clickPower = 1;
-    let ups = 0;
-    let resurrectionCount = 0;
-    let upsMultiplier = 1;
-    let upcMultiplier = 1;
+    let umyums = 0, clickPower = 1, ups = 0;
+    let upcMultiplier = 1, upsMultiplier = 1, resurrectionCount = 0;
     let goldenActive = false;
-    let goldenTimer = 0;
-    let goldenInterval;
-
     const newsLines = [
-      [1, "You've started your umyum journey!"],
-      [500, "The neighborhood wants to try your cookies at the party!"],
-      [1000, "Local bake sale features your umyums!"],
-      [10000, "You're supplying candy to stores!"],
-      [25000, "A candy corporation takes interest!"],
-      [50000, "Umyums featured in space snacks!"],
-      [100000, "You broke the candy economy!"],
-      [1e6, "Your umyums bend the laws of physics!"],
-      [1e12, "Your umyums transcend space and time!"]
+      [1, "You collected your first umyum!"],
+      [500, "The neighborhood wants to try your cookies!"],
+      [1000, "Local store asks to stock Umyums!"],
+      [10000, "You now own a candy shop."],
+      [25000, "Candy empire in the making!"],
+      [50000, "TV ad runs for Umyums."],
+      [100000, "Government issues candy regulation."],
+      [1e6, "Your Umyums transcend space and time!"]
     ];
 
     function formatNumber(num) {
-      const abbrev = ["", "thousand", "million", "billion", "trillion"];
-      let i = 0;
-      while (num >= 1000 && i < abbrev.length - 1) {
+      if (num < 1e6) return Math.floor(num).toLocaleString();
+      const units = ["Million","Billion","Trillion","Quadrillion"];
+      let unitIndex = -1;
+      while (num >= 1000 && unitIndex < units.length - 1) {
         num /= 1000;
-        i++;
+        unitIndex++;
       }
-      return num.toFixed(2) + " " + abbrev[i];
+      return num.toFixed(2) + " " + units[unitIndex];
+    }
+
+    function clickUmyum() {
+      umyums += clickPower * upcMultiplier;
+      const candy = document.getElementById("umyum");
+      candy.classList.add("clicked");
+      setTimeout(() => candy.classList.remove("clicked"), 250);
+      updateDisplay();
+      updateNews();
     }
 
     function updateDisplay() {
       document.getElementById("count").textContent = formatNumber(umyums);
       document.getElementById("upc").textContent = (clickPower * upcMultiplier).toFixed(1);
-      document.getElementById("upcTracker").textContent = (clickPower * upcMultiplier).toFixed(1);
       document.getElementById("ups").textContent = (ups * upsMultiplier).toFixed(1);
-      document.getElementById("resCount").textContent = resurrectionCount;
+      document.getElementById("upcTracker").textContent = (clickPower * upcMultiplier).toFixed(1);
+      document.getElementById("resurrections").textContent = resurrectionCount;
+    }
 
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.querySelector(`#tabs button[onclick="showTab('${tabId}')"]`).classList.add('active');
+    }
+
+    function tryResurrect() {
+      const cost = 1e21 * Math.pow(2, resurrectionCount);
+      if (umyums >= cost) {
+        let choice = prompt("Choose bonus: 'ups' or 'click'");
+        if (choice === 'ups') upsMultiplier *= 2;
+        else if (choice === 'click') upcMultiplier *= 2;
+        umyums = 0;
+        clickPower = 1;
+        ups = 0;
+        resurrectionCount++;
+        updateDisplay();
+      } else {
+        alert("Need " + formatNumber(cost) + " umyums.");
+      }
+    }
+
+    function updateNews() {
       for (let i = newsLines.length - 1; i >= 0; i--) {
         if (umyums >= newsLines[i][0]) {
           document.getElementById("newsText").textContent = newsLines[i][1];
@@ -211,135 +244,85 @@
       }
     }
 
-    function clickUmyum() {
-      umyums += clickPower * upcMultiplier;
-      updateDisplay();
-      const umyum = document.getElementById("umyum");
-      umyum.classList.add("clicked");
-      setTimeout(() => umyum.classList.remove("clicked"), 250);
-    }
-
-    function createUpgrade(name, baseCost, isAuto, production) {
+    function createUpgrade(name, baseCost, isAuto, amount) {
       const div = document.createElement("div");
-      div.className = "upgrade";
-      let count = 0;
-      let cost = baseCost;
-      const costP = document.createElement("p");
-      const ownedP = document.createElement("p");
+      div.className = isAuto ? 'ups' : 'upgrade';
+      let count = 0, cost = baseCost;
+      const p = document.createElement("p");
       const button = document.createElement("button");
-
-      function refresh() {
-        costP.textContent = `Cost: ${formatNumber(cost)} Umyums`;
-        ownedP.textContent = `Owned: ${count}`;
-      }
-
-      button.textContent = "Buy";
+      button.textContent = `Buy ${name}`;
       button.onclick = () => {
         if (umyums >= cost) {
           umyums -= cost;
-          if (isAuto) ups += production;
-          else clickPower += production;
-          count++;
+          if (isAuto) ups += amount;
+          else clickPower += amount;
           cost *= 1.3;
-          refresh();
+          count++;
+          p.textContent = `Owned: ${count} | Cost: ${formatNumber(cost)}`;
           updateDisplay();
         }
       };
-
-      div.innerHTML = `<strong>${name}</strong><br>`;
-      div.appendChild(costP);
-      div.appendChild(ownedP);
-      div.appendChild(button);
-      refresh();
-      document.getElementById(isAuto ? "ups" : "upc").appendChild(div);
+      p.textContent = `Owned: ${count} | Cost: ${formatNumber(cost)}`;
+      div.append(p, button);
+      document.getElementById(isAuto ? 'upsTab' : 'upcTab').appendChild(div);
     }
 
-    const clickNames = ["Candy Tapper", "Sugar Smash", "Lick Boost", "Sweet Press"];
-    const autoNames = ["Candy Machine", "Auto Chewer", "Gumball Gear", "Sugar Synth"];
-
-    clickNames.forEach((name, i) => createUpgrade(name, Math.pow(10, i + 1), false, Math.pow(5, i)));
-    autoNames.forEach((name, i) => createUpgrade(name, Math.pow(10, i + 2), true, Math.pow(5, i)));
+    ["Candy Tapper", "Sweet Swipe", "Lick Boost"].forEach((name, i) => createUpgrade(name, 10 ** (i + 1), false, 5 ** i));
+    ["Auto Chewer", "Sugar Mill", "Candy Bot"].forEach((name, i) => createUpgrade(name, 10 ** (i + 1), true, 5 ** i));
 
     setInterval(() => {
       umyums += ups * upsMultiplier;
       updateDisplay();
     }, 1000);
 
-    function spawnCandy() {
-      const candy = document.createElement("div");
-      candy.className = "candy";
-      candy.style.left = Math.random() * window.innerWidth + "px";
-      candy.textContent = "🍬";
-      document.body.appendChild(candy);
-      setTimeout(() => candy.remove(), 6000);
-    }
-
-    setInterval(spawnCandy, 800);
-
-    function spawnGoldenBunny() {
-      if (document.querySelector(".golden-bunny")) return;
-      const bunny = document.createElement("div");
-      bunny.className = "golden-bunny";
-      bunny.textContent = "🐇";
-      bunny.style.top = Math.random() * (window.innerHeight - 50) + "px";
-      bunny.style.left = Math.random() * (window.innerWidth - 50) + "px";
-      bunny.onclick = () => {
-        upcMultiplier *= 7;
-        bunny.remove();
+    function spawnGolden() {
+      const el = document.createElement("div");
+      el.textContent = "🐇";
+      el.className = "candy";
+      el.style.left = Math.random() * window.innerWidth + "px";
+      el.onclick = () => {
+        el.remove();
         goldenActive = true;
+        upcMultiplier *= 7;
         document.getElementById("multiplierOverlay").style.display = "block";
-        goldenTimer = 60;
-        updateGoldenTimer();
-        goldenInterval = setInterval(() => {
-          goldenTimer--;
-          updateGoldenTimer();
-          if (goldenTimer <= 0) {
-            clearInterval(goldenInterval);
+        document.getElementById("goldenTimer").style.display = "block";
+        let t = 60;
+        const timer = setInterval(() => {
+          t--;
+          document.getElementById("goldenTimer").textContent = `Golden Bunny: ${t}s`;
+          if (t <= 0) {
+            clearInterval(timer);
             upcMultiplier /= 7;
             goldenActive = false;
             document.getElementById("multiplierOverlay").style.display = "none";
-            document.getElementById("bunnyTimer").textContent = "";
+            document.getElementById("goldenTimer").style.display = "none";
           }
         }, 1000);
+        for (let i = 0; i < 20; i++) sparkle();
       };
-      document.body.appendChild(bunny);
+      document.body.appendChild(el);
     }
 
-    function updateGoldenTimer() {
-      document.getElementById("bunnyTimer").textContent = `Golden Bunny: ${goldenTimer}s remaining!`;
+    function sparkle() {
+      const s = document.createElement("div");
+      s.className = "sparkle";
+      s.style.top = Math.random() * window.innerHeight + "px";
+      s.style.left = Math.random() * window.innerWidth + "px";
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 1000);
     }
 
     setInterval(() => {
-      if (Math.random() < 0.01) spawnGoldenBunny();
-    }, 2000);
+      const c = document.createElement("div");
+      c.className = "candy";
+      c.style.left = Math.random() * window.innerWidth + "px";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 6000);
+    }, 500);
 
-    function tryResurrect() {
-      const cost = 1e6 * Math.pow(2, resurrectionCount);
-      if (umyums >= cost) {
-        const choice = prompt("Resurrect! Type 'ups' for 2x UPS or 'upc' for 2x UPC:");
-        if (choice === "ups") upsMultiplier *= 2;
-        else if (choice === "upc") upcMultiplier *= 2;
-        umyums = 0;
-        ups = 0;
-        clickPower = 1;
-        resurrectionCount++;
-        updateDisplay();
-      } else {
-        alert(`Need ${formatNumber(cost)} Umyums to resurrect.`);
-      }
-    }
-
-    // Tab Switching
-    document.querySelectorAll(".tab-button").forEach(btn => {
-      btn.onclick = () => {
-        document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
-        document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-        btn.classList.add("active");
-        document.getElementById(btn.dataset.tab).classList.add("active");
-      };
-    });
-
-    updateDisplay();
+    setInterval(() => {
+      if (!document.querySelector(".candy")) spawnGolden();
+    }, 180000); // ~3 minutes
   </script>
 </body>
 </html>
