@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: sans-serif;
-      background: #ffeff7;
+      background: radial-gradient(circle, #ffeff7 30%, #ffb6d5 100%);
       margin: 0;
       overflow-x: hidden;
     }
@@ -26,6 +26,23 @@
       cursor: pointer;
       display: block;
       margin: 20px auto;
+    }
+    #umyum.umyum-animate {
+      animation: umyumClickEffect 0.5s ease;
+    }
+    @keyframes umyumClickEffect {
+      0% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
+      50% {
+        transform: scale(1.2);
+        filter: brightness(1.4);
+      }
+      100% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
     }
     #stats {
       text-align: center;
@@ -79,7 +96,10 @@
       top: -50px;
       width: 30px;
       height: 30px;
-      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Emoji_u1f36c.svg/1024px-Emoji_u1f36c.svg.png') no-repeat center/contain;
+      z-index: 2;
+      background: none;
+      font-size: 28px;
+      text-align: center;
       animation: fall 5s linear forwards;
     }
     @keyframes fall {
@@ -131,6 +151,12 @@
 
     function clickUmyum() {
       umyums += clickPower * upcMultiplier;
+
+      const umyumElem = document.getElementById('umyum');
+      umyumElem.classList.remove('umyum-animate');
+      void umyumElem.offsetWidth;
+      umyumElem.classList.add('umyum-animate');
+
       updateDisplay();
     }
 
@@ -177,8 +203,8 @@
     const clickUpgradeNames = ["Candy Tapper", "Sugar Smash", "Lick Boost", "Sweet Press"];
     const autoUpgradeNames = ["Candy Machine", "Auto Chewer", "Gumball Gear", "Sugar Synth"];
 
-    clickUpgradeNames.forEach((name, i) => createUpgrade(name, Math.pow(10, i + 1), false, 1));
-    autoUpgradeNames.forEach((name, i) => createUpgrade(name, Math.pow(10, i + 1), true, 0.1 * (i + 1)));
+    clickUpgradeNames.forEach((name, i) => createUpgrade(name, Math.pow(10, i + 1), false, Math.pow(5, i)));
+    autoUpgradeNames.forEach((name, i) => createUpgrade(name, Math.pow(10, i + 1), true, 0.1 * Math.pow(5, i)));
 
     setInterval(() => {
       umyums += ups * upsMultiplier;
@@ -202,6 +228,7 @@
     function dropCandy() {
       const candy = document.createElement('div');
       candy.className = 'candy';
+      candy.textContent = '🍭';
       candy.style.left = Math.random() * window.innerWidth + 'px';
       document.body.appendChild(candy);
       setTimeout(() => candy.remove(), 6000);
