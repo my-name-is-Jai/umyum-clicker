@@ -2,42 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Umyum Clicker</title>
   <style>
     body {
       font-family: sans-serif;
-      background: radial-gradient(circle, #ffe6f0 0%, #ffccde 100%);
       margin: 0;
+      background: radial-gradient(circle, #ffd6e8 0%, #ffeff7 80%);
       overflow-x: hidden;
     }
     h1 {
       text-align: center;
       color: #e91e63;
     }
-    #news {
+    #newsTicker {
+      position: fixed;
+      top: 0;
       width: 100%;
+      background: #ffe0ec;
+      color: #d81b60;
       white-space: nowrap;
       overflow: hidden;
-      background: #ffebf0;
-      color: #c2185b;
-      font-weight: bold;
-      padding: 5px 0;
+      z-index: 10;
     }
-    #news span {
+    #newsText {
       display: inline-block;
       padding-left: 100%;
-      animation: scroll 20s linear infinite;
+      animation: scrollLeft 20s linear infinite;
     }
-    @keyframes scroll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-100%); }
+    @keyframes scrollLeft {
+      from { transform: translateX(0); }
+      to { transform: translateX(-100%); }
     }
     #main-content {
       display: flex;
       justify-content: space-between;
-      height: calc(100vh - 140px);
+      height: calc(100vh - 100px);
       padding: 10px;
+      margin-top: 30px;
     }
     #umyum {
       font-size: 5em;
@@ -47,7 +49,7 @@
       transition: transform 0.25s, filter 0.25s;
     }
     #umyum.clicked {
-      transform: scale(1.2);
+      transform: scale(1.1);
       filter: brightness(1.2);
     }
     #stats {
@@ -84,21 +86,7 @@
       position: absolute;
       width: 60px;
       cursor: pointer;
-      z-index: 10;
-    }
-    .candy {
-      position: fixed;
-      top: -50px;
-      width: 30px;
-      height: 30px;
-      z-index: 0;
-      background: url('https://em-content.zobj.net/thumbs/120/apple/354/candy_1f36c.png') no-repeat center/contain;
-      animation: fall 5s linear forwards;
-    }
-    @keyframes fall {
-      to {
-        transform: translateY(110vh);
-      }
+      z-index: 11;
     }
     #multiplierOverlay {
       position: fixed;
@@ -111,34 +99,45 @@
       pointer-events: none;
       display: none;
     }
-    #timer {
+    #candyContainer {
       position: fixed;
-      top: 10px;
-      right: 10px;
-      background: #fff3cd;
-      color: #856404;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-weight: bold;
-      z-index: 20;
-      display: none;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .candy {
+      position: absolute;
+      top: -50px;
+      width: 30px;
+      height: 30px;
+      text-align: center;
+      animation: fall 5s linear forwards;
+    }
+    @keyframes fall {
+      to {
+        transform: translateY(110vh);
+      }
     }
   </style>
 </head>
 <body>
+  <div id="newsTicker"><div id="newsText"></div></div>
   <h1>Umyum Clicker</h1>
-  <div id="news"><span id="newsText">Welcome to Umyum Clicker!</span></div>
   <div id="multiplierOverlay"></div>
-  <div id="timer"></div>
+  <div id="candyContainer"></div>
   <div id="main-content">
     <div id="stats">
       <div id="umyum" onclick="clickUmyum()">🍬</div>
       <p><strong>Umyums:</strong> <span id="count">0</span></p>
-      <p><strong>Umyums per Click:</strong> <span id="upc">1.0</span></p>
-      <p><strong>UPS:</strong> <span id="ups">0.0</span></p>
-      <p><strong>Total Umyums per Click:</strong> <span id="upcTracker">1.0</span></p>
+      <p><strong>Umyums per Click:</strong> <span id="upc">1.0 Umyums/click</span></p>
+      <p><strong>UPS:</strong> <span id="ups">0.0 Umyums/sec</span></p>
+      <p><strong>Total Umyums per Click:</strong> <span id="upcTracker">1.0 Umyums/click</span></p>
       <p><strong>Resurrections:</strong> <span id="resurrections">0</span></p>
       <button onclick="tryResurrect()">Bunny Resurrection</button>
+      <div id="multiplierTimer"></div>
     </div>
     <div id="sidebar">
       <h2>Click Upgrades</h2>
@@ -154,57 +153,59 @@
     let resurrectionCount = 0;
     let upcMultiplier = 1;
     let upsMultiplier = 1;
-    let multiplierActive = false;
-    let multiplierTime = 0;
+    let multiplierTimer = null;
+
+    const newsLines = [
+      [1, "You made your first Umyum!"],
+      [500, "The neighborhood wants to try your cookies at the party!"],
+      [1000, "Umyums featured in a local newspaper!"],
+      [10000, "A Umyum startup wants to sponsor you!"],
+      [25000, "People are camping outside to try Umyums!"],
+      [50000, "Umyums going intercontinental!"],
+      [100000, "World leaders are discussing Umyum economy!"],
+      [1e6, "You hit one million! Sweet milestone!"],
+      [1e12, "Your Umyums transcend space and time!"]
+    ];
 
     function formatNumber(num) {
       if (num < 1e6) return Math.round(num).toString();
-      const units = ['million','billion','trillion','quadrillion','quintillion'];
+      const units = ["million", "billion", "trillion", "quadrillion", "quintillion"];
       let unitIndex = -1;
       while (num >= 1000 && unitIndex < units.length - 1) {
         num /= 1000;
         unitIndex++;
       }
-      return num.toFixed(2) + ' ' + units[unitIndex];
+      return num.toFixed(2) + " " + units[unitIndex];
     }
 
     function clickUmyum() {
       umyums += clickPower * upcMultiplier;
-      const umyumEl = document.getElementById('umyum');
-      umyumEl.classList.add('clicked');
-      setTimeout(() => umyumEl.classList.remove('clicked'), 250);
+      const umyumEl = document.getElementById("umyum");
+      umyumEl.classList.add("clicked");
+      setTimeout(() => umyumEl.classList.remove("clicked"), 250);
       updateDisplay();
     }
 
     function updateDisplay() {
-      document.getElementById('count').textContent = formatNumber(umyums);
-      document.getElementById('ups').textContent = (ups * upsMultiplier).toFixed(1);
-      document.getElementById('upc').textContent = (clickPower * upcMultiplier).toFixed(1);
-      document.getElementById('upcTracker').textContent = (clickPower * upcMultiplier).toFixed(1);
-      document.getElementById('resurrections').textContent = resurrectionCount;
+      document.getElementById("count").textContent = formatNumber(umyums);
+      document.getElementById("ups").textContent = (ups * upsMultiplier).toFixed(1) + " Umyums/sec";
+      document.getElementById("upc").textContent = (clickPower * upcMultiplier).toFixed(1) + " Umyums/click";
+      document.getElementById("upcTracker").textContent = (clickPower * upcMultiplier).toFixed(1) + " Umyums/click";
+      document.getElementById("resurrections").textContent = resurrectionCount;
       updateNews();
     }
 
-    function updateNews() {
-      const news = document.getElementById("newsText");
-      if (umyums < 500) news.textContent = "The candy smells sweet today...";
-      else if (umyums < 1e6) news.textContent = "The neighborhood wants your cookies at the party!";
-      else if (umyums < 1e9) news.textContent = "Your candy is hitting supermarket shelves!";
-      else if (umyums < 1e12) news.textContent = "Scientists discover your Umyums generate energy!";
-      else news.textContent = "Your Umyums transcend space and time!";
-    }
-
     function createUpgrade(name, baseCost, isAuto = false, production = 1) {
-      const div = document.createElement('div');
-      div.className = isAuto ? 'ups' : 'upgrade';
-      const title = document.createElement('h3');
+      const div = document.createElement("div");
+      div.className = isAuto ? "ups" : "upgrade";
+      const title = document.createElement("h3");
       title.textContent = name;
-      const costDisplay = document.createElement('p');
+      const costDisplay = document.createElement("p");
       costDisplay.textContent = `Cost: ${formatNumber(baseCost)} umyums`;
-      const countDisplay = document.createElement('p');
+      const countDisplay = document.createElement("p");
       countDisplay.textContent = `Owned: 0`;
-      const button = document.createElement('button');
-      button.textContent = 'Buy';
+      const button = document.createElement("button");
+      button.textContent = "Buy";
       let cost = baseCost;
       let count = 0;
       button.onclick = function () {
@@ -223,7 +224,7 @@
       div.appendChild(costDisplay);
       div.appendChild(countDisplay);
       div.appendChild(button);
-      document.getElementById(isAuto ? 'autoUpgrades' : 'clickUpgrades').appendChild(div);
+      document.getElementById(isAuto ? "autoUpgrades" : "clickUpgrades").appendChild(div);
     }
 
     const clickUpgradeNames = ["Candy Tapper", "Sugar Smash", "Lick Boost", "Sweet Press"];
@@ -238,61 +239,57 @@
     }, 1000);
 
     function spawnLollipop() {
-      const lollipop = document.createElement('div');
-      lollipop.className = 'lollipop';
-      lollipop.style.top = Math.random() * window.innerHeight + 'px';
-      lollipop.style.left = Math.random() * window.innerWidth + 'px';
-      lollipop.style.fontSize = '48px';
-      lollipop.textContent = Math.random() > 0.5 ? '🐇' : '🐰';
+      const lollipop = document.createElement("div");
+      lollipop.className = "lollipop";
+      lollipop.style.top = Math.random() * window.innerHeight + "px";
+      lollipop.style.left = Math.random() * window.innerWidth + "px";
+      lollipop.style.fontSize = "48px";
+      lollipop.textContent = Math.random() > 0.5 ? "🐇" : "🐰";
       lollipop.onclick = () => {
-        startMultiplier();
+        document.getElementById("multiplierOverlay").style.display = "block";
+        if (multiplierTimer) clearTimeout(multiplierTimer);
+        upsMultiplier = 7;
+        upcMultiplier = 7;
+        let timer = 60;
+        const timerEl = document.getElementById("multiplierTimer");
+        timerEl.textContent = `7x Boost: ${timer}s`;
+        const countdown = setInterval(() => {
+          timer--;
+          timerEl.textContent = `7x Boost: ${timer}s`;
+          if (timer <= 0) {
+            clearInterval(countdown);
+            timerEl.textContent = "";
+            document.getElementById("multiplierOverlay").style.display = "none";
+            upsMultiplier = 1;
+            upcMultiplier = 1;
+            updateDisplay();
+          }
+        }, 1000);
         lollipop.remove();
       };
       document.body.appendChild(lollipop);
     }
 
-    function startMultiplier() {
-      upcMultiplier *= 7;
-      upsMultiplier *= 7;
-      multiplierTime = 60;
-      multiplierActive = true;
-      document.getElementById('multiplierOverlay').style.display = 'block';
-      document.getElementById('timer').style.display = 'block';
-    }
-
-    setInterval(() => {
-      if (multiplierActive) {
-        multiplierTime--;
-        document.getElementById('timer').textContent = `7x Boost: ${multiplierTime}s left`;
-        if (multiplierTime <= 0) {
-          upcMultiplier /= 7;
-          upsMultiplier /= 7;
-          multiplierActive = false;
-          document.getElementById('multiplierOverlay').style.display = 'none';
-          document.getElementById('timer').style.display = 'none';
-        }
-      }
-    }, 1000);
-
     function dropCandy() {
-      const candy = document.createElement('div');
-      candy.className = 'candy';
-      candy.style.left = Math.random() * window.innerWidth + 'px';
-      document.body.appendChild(candy);
+      const candy = document.createElement("div");
+      candy.className = "candy";
+      candy.textContent = "🍭";
+      candy.style.left = Math.random() * window.innerWidth + "px";
+      document.getElementById("candyContainer").appendChild(candy);
       setTimeout(() => candy.remove(), 6000);
     }
 
     setInterval(dropCandy, 500);
     setInterval(() => {
-      if (!document.querySelector('.lollipop')) spawnLollipop();
+      if (!document.querySelector(".lollipop")) spawnLollipop();
     }, (Math.random() * 2 + 3) * 60 * 1000);
 
     function tryResurrect() {
       const required = 1e21 * Math.pow(2, resurrectionCount);
       if (umyums >= required) {
         const choice = prompt('Choose bonus: type "ups" for 2x UPS or "click" for 2x UPC');
-        if (choice === 'ups') upsMultiplier *= 2;
-        else if (choice === 'click') upcMultiplier *= 2;
+        if (choice === "ups") upsMultiplier *= 2;
+        else if (choice === "click") upcMultiplier *= 2;
         umyums = 0;
         ups = 0;
         clickPower = 1;
@@ -303,6 +300,21 @@
         alert(`You need ${formatNumber(required)} umyums to resurrect.`);
       }
     }
+
+    let currentNews = "Welcome to Umyum Clicker!";
+    function updateNews() {
+      for (let i = newsLines.length - 1; i >= 0; i--) {
+        if (umyums >= newsLines[i][0]) {
+          if (currentNews !== newsLines[i][1]) {
+            currentNews = newsLines[i][1];
+            document.getElementById("newsText").textContent = currentNews;
+          }
+          break;
+        }
+      }
+    }
+
+    updateDisplay();
   </script>
 </body>
 </html>
